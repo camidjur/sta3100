@@ -1,0 +1,121 @@
+---
+title: "STA 3100 Programming with Data: Assignment 030"
+params:
+  term: "Fall 2022"
+  duedate: "2022-10-23"
+  section: "4515 / 6736"
+  classnumber: "25533 / 26666"
+  name: "Camila Djurinsky Zapolski"
+  ufid: "31303092"
+  email: "djurinsky.camila@ufl.edu"
+  grade: NA
+output: 
+  html_document: default
+  pdf_document: default
+---
+
+# Importing Data and Working with Data Frames and Dates
+
+Note: To prevent echoing of messages and warnings in chunk output, at times you may find it useful to set one or both of the chunk options `message = FALSE` and `warning = FALSE`.
+
+## Guitars
+
+1. The file `Data/guitars2.csv` contains information about a small collection of guitars.
+
+   (a) (10 pts) Use the readr function `read_csv()` to read the file into R as a data frame (tibble) names `guitars`.  The entries in the columns "Purchase Price" and "Insured Value" should be read as numbers and the entries in the column "Purchase Date" should be read as dates. You must specify this using the optional `col_types` argument of the `read_csv()` function (see sections 11.3.1 and 11.4.2 of [r4ds](https://r4ds.had.co.nz/ "R for Data Science: Import, Tidy, Transform, Visualize, and Model Data")).  Note that `Purchase Date`, `Purchase Price`, and `Insured Value` are non-syntactic names (because they contain spaces), so you need to surround them with backticks when refering to them in R code.
+
+```{r, message = FALSE, warning = FALSE}
+
+library(tidyverse)
+guitars <- read_csv("C:/Users/camid/Documents/UF/SOPHOMORE YR/FALL2022/STA3100/data frames/Data/guitars2.csv", col_types = cols(
+  "Purchase Price"= col_number(), 
+  "Insured Value" = col_number(), 
+  "Purchase Date" = col_date())
+  )
+```
+       When you have done this part correctly, you will still receive a warning about "parsing issues".  What is the source of the problem?
+
+The source of this problem is that there are two NAs in the data frame. Because they are not available values and thus not in the proper format, they cause the parsing issues.  
+
+   (b) (5 pts) Use the dplyr function `rename()` to rename the columns "Weight with Case", "Weight of Case", "Purchase Date", "Purchase Price", "Purchased New", and "Insured Value" to "wt_w_case", "wt_case", "prch_date", "prch_price", "prch_new", and "ins_val", respectively.
+   
+```{r, message = FALSE, warning = FALSE}
+library(dplyr)
+guitars <- guitars %>% 
+  rename("wt_w_case" = "Weight with Case", "wt_case" = "Weight of Case", "prch_date" = "Purchase Date", "prch_price" = "Purchase Price", "prch_new" = "Purchased New", "ins_val" = "Insured Value")
+```
+   (c) (5 pts) Now change all the column names to lower case. To do this you can either use the dplyr function `rename_with()` or the base R function `names()`.  Note that two functions that can be used to change character strings to lower case are `str_to_lower()` from the tidyverse package `stringr` and `tolower()` from base R.
+
+```{r, message = FALSE, warning = FALSE}
+guitars <- guitars %>%
+  rename_with(tolower)
+```
+
+   (d) (5 pts) For the guitar with serial number 616619, set the purchase date to July 2, 1977. *Hint*: A base R solution is fairly straightforward.  However, if you want to do this in a tidyverse way, you could use `mutate()` with the `replace()` function, taking the index argument of `replace()` to be `serial == "616619"`.
+```{r, message = FALSE, warning = FALSE}
+guitars$prch_date[guitars$serial == "616619"] <- "1977-07-02"
+```
+   (e) (5 pts) Use the dplyr function `mutate()` with the lubridate functions `year()` and `month()` to create columns `prch_year` and `prch_month` containing the year of purchase (numeric) and the month of purchase (factor with abbreviated month names), respectively.
+```{r, message = FALSE, warning = FALSE}
+library(lubridate)
+guitars <- guitars %>% 
+  mutate(
+    prch_year = year(prch_date),
+    prch_month = month.abb[month(prch_date)])
+guitars
+```
+
+## Consumer Price Index
+
+6. The file `Data/cpi.cvs` contains the values of the Consumer Price Index (CPI) from January 1947 through September 2022.to 
+
+   (a) (5 pts) Use the readr function `read_csv()` to read the file into R as a data frame (tibble) named `cpi`.
+```{r, message = FALSE, warning = FALSE}
+cpi <- read_csv("C:/Users/camid/Documents/UF/SOPHOMORE YR/FALL2022/STA3100/data frames/Data/cpi.csv")
+```
+
+   (b) (5 pts) Remove the columns `HALF1` and `HALF2` from the `cpi` data frame.
+```{r, warning = FALSE, message = FALSE}
+cpi <- cpi[, !names(cpi) %in% c("HALF1", "HALF2")]
+```
+
+   (c) (5 pts) Now use the tidyr function `pivot_longer()` to change `cpi` the data frame to have columns `Year`, `Month`, and `CPI`.  *Hint*: Set the `cols` argument to `!Year`, the `names_to` argument to `"Month"`, and the `values_to` argument to `"CPI"`.
+```{r, message = FALSE, warning = FALSE}
+library(tidyr)
+cpi <- cpi %>%
+  pivot_longer(cols = !Year, names_to = "Month", values_to = "CPI")
+```
+
+   (d) (5 pts) Use the dplyr functions `group_by()` and `summarize()` (or `summarise()`) to create a data frame `cpi_by_year` containing the average (mean) CPI for each year from 2013 though 2022.  *Note*: Because the CPIs for October 2022 through December 2022 are not available yet, you will get `NA` for 2022 unless you set `na.rm = TRUE` in the `mean()` function.  Either solution will be accepted.
+```{r, message = FALSE, warning = FALSE}
+cpi_by_year <- cpi %>%
+  group_by(Year) %>%
+  filter(Year >= 2013 & Year <= 2022) %>%
+  summarise(average_CPI = mean(CPI, na.rm = TRUE)) 
+cpi_by_year
+```
+## Adjusting for Inflation
+
+3. To adjust a dollar amount `x` at time 1 to an equivalent dollar amount at time 2, one multiplies `x` by the ratio of the CPI at time 2 to the CPI at time 1, so `(CPI2 / CPI1) * x`.  Indeed, this is exactly the calculation done by the Bureau of Labor Statistic's online [CPI Inflation Calculator](https://www.bls.gov/data/inflation_calculator.htm).
+
+   (a) (5 pts) Use the dplyr function `left_join()` to add a column `prch_cpi` to the guitars data frame containing CPI for the month and year that the guitar was purchased.
+```{r, message = FALSE, warning = FALSE}
+guitars <- guitars %>%
+  left_join(cpi, by = c('prch_year' = 'Year', 'prch_month' = 'Month')) %>% 
+  rename("prch_cpi" = "CPI") 
+```
+   (b) (5 pts) As you can see from the data, the CPI for September 2022 is 296.808. Use the dplyr function `mutate()` to add a column named `adj_prch_price` to the `guitars` data frame giving the inflation adjusted purchase prices of the guitars as of September 2022.
+   
+```{r, message = FALSE, warning = FALSE}
+guitars <- guitars %>% mutate(adj_prch_price = (296.808/prch_cpi)*prch_price)
+```
+
+   (c) (5 pts) Use the dplyr functions `select()` and `arrange()` to display the model, year, purchase date, purchase price, adjusted purchase price, and insured value for the guitars, ordered by date of purchase.
+```{r, message = FALSE, warning = FALSE}
+guitars %>% 
+  select("model", "year", "prch_date", "prch_price", "adj_prch_price", "ins_val")%>%
+  arrange(desc(prch_date))
+```
+---
+subtitle: (65 points)
+---

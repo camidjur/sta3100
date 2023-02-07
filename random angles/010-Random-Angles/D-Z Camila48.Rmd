@@ -1,0 +1,141 @@
+---
+title: "STA 3100 Programming with Data: Assignment 010"
+params:
+  term: "Fall 2022"
+  duedate: "2022-09-13"
+  section: "4515 / 6736"
+  classnumber: "25533 / 26666"
+  name: "Camila Djurinsky Zapolski"
+  ufid: "31303092"
+  email: "djurinsky.camila@ufl.edu"
+  total_points: 20
+  grade: NA
+output: 
+  html_document: default
+  pdf_document: default
+---
+TA comments:
+
+No answer for question 1a on knitted file (note that TA does not read rmd file to grade). 1pt taken off.
+
+
+1pt taken off for 3c for not using "probs" argument.
+
+
+# A Random Angle
+
+If the random variables $X$ and $Y$ are independent and uniformly
+distributed on the unit interval (the interval from $0$ to $1$), then
+the ordered pair $(X,Y)$ is uniformly distributed on the unit square
+$A = \{(x,y) : 0 \le x \le 1, 0 \le y \le 1\}$.  Here is an example of
+a single such point generated in R.  (Here I have set the seed for the
+random number generator so that I get the same result each time this
+code is run.)
+
+```{r}
+set.seed(324)
+X <- runif(1)
+Y <- runif(1)
+```
+
+With the seed set as above, the point generated is
+$(X,Y) = (0.7290204, 0.4236485)$.
+(If you change the seed or remove the `set.seed()` command altogether,
+then you will get a different point.)
+
+Now consider the random angle $\theta$ between the $x$-axis and the
+segment joining the origin $(0,0)$ to the point $(X,Y)$.  Notice that
+the tangent of this angle is $Y/X$ ("opposite over adjacent"; see
+figure), so in our example the observed angle (in degrees) is
+$$
+\theta = \tan^{-1}(0.4236485/0.7290204) = 30.1617392.
+$$
+
+
+
+Suppose that we are interested in the distribution of the random angle
+$\theta$. It is possible to derive the probability density of $\theta$
+mathematically (see STA 4321), but even if we do not know how to do
+this, we can still approximate the distribution by simulation.
+To do this, we must draw many random observations from the
+distribution of $\theta$, or equivalently, we must draw a large number
+of independent $X$ and $Y$ values from the uniform distribution and
+calculate the value of theta corresponding to each $(X,Y)$ pair (R's
+vectorized functions make this easy). Then the probability of any
+$\theta$-event can be approximated by calculating the proportion of
+simulated $\theta$ values for which the event occurs.
+
+# Exercises
+
+1. (10 pts) Calculate 100,000 independent simulated observations of
+   $\theta$ from the random experiment described in the introduction
+   (do not print the values).
+```{r setup}
+X <- runif(100000)
+Y <- runif(100000)
+theta <- atan(Y/X)*(180/pi)
+
+```
+2. 
+   a. (5 pts) With the $\theta$ values generated in exercise #1, use the
+      ` histogram()` function (with `freq = FALSE`) to graph an
+      estimate of the probability density of $\theta$.
+   
+```{r}
+
+hist(theta, freq = FALSE)
+
+
+```
+   
+   b. (5 pts) Based on the histogram, does the distribution appear to be
+      symmetric or is it skewed?  Is it unimodal or multimodal or
+      uniform (flat)?
+   
+    Based on the histogram, it would seem that the distribution is both symmetrical and unimodal.
+   
+   c. (5 pts) Based on the histogram, would you say that the angle is
+      uniformly distributed from 0 to 90 degrees, i.e., does it appear
+      that all values between 0 and 90 degrees are equally likely?
+    
+    No, the angle is normally distributed. This is shown by the fact that angles between 40 and 50 degrees are more likely than angles between 0 and 10 degrees or 70 to 80 degrees.
+ 
+3. Using your simulated values, estimate:
+
+   a. (5 pts) The mean of the distribution of $\theta$.
+   
+   
+    The mean of the distribution is `r mean(theta)`
+   
+   b. (5 pts) The standard deviation of the distribution.
+   
+   
+    The standard deviation of the distribution is `r sd(theta)`
+   
+   c. (5 pts) The lower quartile, median, and upper quartile of the distribution (use the `quantile()` function for this).
+
+```{r}
+thetaNums <- quantile(theta)
+LQ <- thetaNums[2]
+median <- thetaNums[3]
+UQ <- thetaNums[4]
+
+# should have been
+# quantile(theta, probs = seq(0.25, 0.50, 0.75))
+#quantile(theta, probs = seq(0.50, 0.75))
+#quantile(theta, probs = seq(0.75, 1))
+```   
+    The lower quartile of the distribution is `r LQ`
+    
+    The median fo the distribution is `r median`
+    
+    The upper quartile of the distribution is `r UQ`
+
+4. (10 pts) Use your simulated values to estimate the probability that $\theta$ is between 30 and 60 degrees.
+
+```{r}
+thetaSet <- (30 < theta & theta < 60)
+prob <- mean(thetaSet) *100
+```
+
+    The probability that 30 < theta < 60 is `r prob` %

@@ -1,0 +1,61 @@
+---
+title: "STA 3100 Programming with Data: Assignment 020"
+params:
+  term: "Fall 2022"
+  duedate: "2022-09-29"
+  section: "4515 / 6736"
+  classnumber: "25533 / 26666"
+  name: "Camila Djurinsky Zapolski"
+  ufid: "31303092"
+  email: "djurinsky.camila@ufl.edu"
+  total_points: 20
+  grade: NA
+output: 
+  html_document: default
+  pdf_document: default
+---
+
+# Berkeley Admissions Data
+
+The dataset `UCBAdmissions` is distributed with base R.  For the year
+1973, applicants to the graduate programs of the six largest academic
+departments at the University of California Berkeley are
+cross-classified by admission status, gender, and the department to
+which they applied.
+
+```{r}
+ftable(UCBAdmissions, row.vars = c("Admit", "Gender"), col.vars = "Dept")
+```
+
+Note: Some of the functions that I used in the class notes have
+acquired new names.  The old names still work, but `margin.table()`
+has been renamed `marginSums()` and `prop.table()` has been renamed
+`proportions()`.  You can use either, but I would suggest adopting the
+new function names.
+
+## Exercises
+
+1. (5 pts) Display the marginal table cross-classifying admission by
+   gender (ignoring department).
+   
+```{r setup}
+margin.table(UCBAdmissions, c("Admit", "Gender"))
+```
+2. (5 pts) Display the marginal table giving the proportions admitted
+   and rejected by gender (ignoring department).  Express your results as
+   percentages, rounded to one decimal place.  For whom is the
+   admission rate higher overall, males or females?
+   
+```{r}
+round(100 * prop.table(margin.table(UCBAdmissions, c("Admit", "Gender")), "Admit"), 1)
+```
+   Overall, the admission rate is higher for males.
+
+3. (10 pts) Now display a table giving the proportion admitted by
+   gender within each department. Express your results as percentages,
+   rounded to one decimal place. How do these results compare to what
+   you found in exercise 2?
+```{r}
+ftable(round(100 * prop.table(margin.table(UCBAdmissions, c("Admit", "Gender", "Dept")), "Dept"), 1), col.vars = c("Admit", "Gender"), row.vars = ("Dept"))
+```
+These results show the breakdown of admissions based on gender within each department. With this table a different conclusion can be drawn than from the table in exercise 2. In this table we see that the proportions of admission within each department differ, with departments A, B, and D departments having a greater admission of males, while departments C, E and F had a greater admission of females. Granted the difference in admissions also differed greatly, and although the total of overall male admissions was still greater than that of females, this table allows for the argument that females took the lead in the admissions of certain departments. 

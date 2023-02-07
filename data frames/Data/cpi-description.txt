@@ -1,0 +1,21 @@
+Obtained from https://data.bls.gov/cgi-bin/srgate by specifying series
+id CUUR0000SA0 and then "Table Format", "Original Data Value", "All
+Years", "All Time Periods", and "Text -> Comma Delimited".
+
+The following brief description was provided with the data:
+
+--------------------------------------------------------------------------------
+
+Data extracted on: October 17, 2022 (10:20:57 PM)
+
+CPI for All Urban Consumers (CPI-U)
+
+Series Id:    CUUR0000SA0
+
+Not Seasonally Adjusted
+Series Title: All items in U.S. city average, all urban consumers, not seasonally adjusted
+Area:         U.S. city average
+Item:         All items
+Base Period:  1982-84=100
+
+--------------------------------------------------------------------------------
